@@ -1,0 +1,10 @@
+django
+django-cors-headers
+django_extensions
+djangorestframework
+django-jalali-date
+reportlab
+psycopg2
+arabic_reshaper
+python-bidi
+django-braces

@@ -1,0 +1,53 @@
+version: '3.8'
+ 
+services:
+  meeting:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - my_network
+    depends_on:
+      - db
+  db:
+    image: postgres:15
+    container_name: postgres
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - media_root:/app/meeting/assets
+      - meeting_static:/app/static
+    restart: always
+    environment:
+      - DATABASE_NAME=meeting
+      - DATABASE_USER=postgres
+      - POSTGRES_PASSWORD=Msj.116159
+      - HOST=postgres
+      - PORT=5432
+    networks:
+      - my_network
+  nginx:
+    image: mynginx
+    container_name: mynginxCon
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./nginx_html:/usr/share/nginx/html
+    ports:
+      - "80:80"
+      - "443:443"
+      - "4000:4000"
+    networks:
+      - my_network
+    depends_on:
+      - meeting
+ 
+networks:
+  my_network:
+    driver: bridge
+
+volumes:
+  postgres:
+  media_root:
+  meeting_static:
