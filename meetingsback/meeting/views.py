@@ -96,6 +96,9 @@ class MembershipList(APIView):
         return JsonResponse(serial_qset.data, safe=False)
     
     def post(self, request, format=None):
+        members = Membership.objects.filter(employee=request.data['employee'], meeting=request.data['meeting'])
+        if len(members) > 0:
+            return Response({}, status=status.HTTP_201_CREATED)
         serializer = MemberSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

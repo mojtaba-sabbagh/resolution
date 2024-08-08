@@ -26,6 +26,7 @@ services:
       - POSTGRES_PASSWORD=Msj.116159
       - HOST=postgres
       - PORT=5432
+      - SECRET_KEY=django-insecure-)5cl@k5dt7*e8)%1i(6m&8a-g5et7!#oer=gu1qh6^0t($qjy#
     networks:
       - my_network
   nginx:

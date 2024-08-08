@@ -47,6 +47,14 @@
             InputText,
         },
         methods: {
+            isEmpty(obj) {
+                for (const prop in obj) {
+                    if (Object.hasOwn(obj, prop)) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             meetingsName(){
              axios.defaults.withCredentials = true;
              axios({
@@ -214,7 +222,12 @@
                 axios.post(`${serverUrl}api/members/`, {'employee':this.members[row].employee_id, 
                                                         'role':this.members[row].role, 'meeting':this.meetingId})
                     .then(response => {
-                        this.$toast.success('تغییرات ذخیره شد.');
+                        if (this.isEmpty(response.data)){
+                            this.$toast.success('عضو تکراری است.');
+                        }
+                        else {
+                            this.$toast.success('تغییرات ذخیره شد.');
+                        }
                     })
                     .catch(error => {
                         this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
