@@ -26,6 +26,8 @@ urlpatterns = [
     path('employees/', views.EmployeeList.as_view()),
     path('proceedings/', views.ProceedingList.as_view()),
     path('proceedings/<int:pk>/', views.ProceedingDetail.as_view()),
+    path('participants/', views.ParticipantList.as_view()),
+    path('participants/<int:pk>/', views.ParticipantDetail.as_view()),
     path('resolutions/', views.ResolutionList.as_view()),
     path('resolutions/<int:pk>/', views.ResolutionDetail.as_view()),
     path('resolutiontypes/', views.ResolutionTypeList.as_view()),

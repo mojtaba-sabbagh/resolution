@@ -128,6 +128,7 @@
                 });
           },
           addProceedingAPI(){
+            console.log(this.participants);
             if (this.manipulationMode == 0){
                 axios.post(serverUrl+'api/proceedings/', {'proceeding_no':this.proceedingNo, 'pdate':this.toGregorianDate(this.pDate),
                             'ptime':`${this.pTime.HH}:${this.pTime.mm}`, 'loc':this.loc, 'readonly':this.preadonly, 'meeting':this.meetingId, 
@@ -289,6 +290,10 @@
         },
         downloadProceeding(link){
             let filename = 'file';
+            if (link != ''){
+                let linkParts = link.split('/');
+                filename = linkParts[linkParts.length-1];
+            }
             if (this.fileName != ''){
                 filename = this.fileName;
             }

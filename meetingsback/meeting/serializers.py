@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Stockholder, Student, Employee, Meeting, Membership, Proceeding, Resolution, ResolutionType
+from .models import Stockholder, Student, Employee, Meeting, Membership, Proceeding,\
+                    Resolution, ResolutionType, Participant
 from jalali_date import date2jalali
 
 from django.contrib.auth import authenticate
@@ -49,10 +50,38 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = '__all__'
 
+class ParticipatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = '__all__'
+
+class ParticipatsSerializerMain(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = ('proceeding', 'member')
+
 class ProceedingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proceeding
         fields = '__all__'
+
+class ProceedingKartablSerializer(serializers.ModelSerializer):
+    meeting = serializers.SerializerMethodField()
+    def get_meeting(self, obj):
+        return obj.meeting.meeting_name
+    pdate = serializers.SerializerMethodField()
+    def get_pdate(self, obj):
+        return date2jalali(obj.pdate).strftime('%Y/%m/%d')
+    class Meta:
+        model = Proceeding
+        fields = (
+            'meeting',
+            'proceeding_no',
+            'pdate',
+            'id',
+            'upload'
+        )
+    
         
 class ResolutionSerializer(serializers.ModelSerializer):
     class Meta:

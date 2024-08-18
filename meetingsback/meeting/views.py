@@ -20,7 +20,7 @@ from django.utils.dateparse import parse_date
 import mimetypes
 # Import HttpResponse module
 from django.http.response import HttpResponse
-
+from django.forms.models import model_to_dict
 
 import io
 import os
@@ -30,7 +30,7 @@ from django.http import FileResponse
 from reportlab.pdfgen import canvas
 import arabic_reshaper
 from bidi.algorithm import get_display
-
+from copy import copy
 
 # Create your views here.
 Daneshjou = 'دانشجو'
@@ -167,10 +167,15 @@ class ProceedingList(APIView):
         return JsonResponse(serial_qset.data, safe=False)
     
     def post(self, request, format=None):
-        print(request.data)
         serializer = ProceedingSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            proceeding_obj = serializer.save()
+            for par in request.data['participants']:
+                par_serializer = ParticipatsSerializerMain(data={'proceeding':proceeding_obj.pk, 'member':par})
+                if par_serializer.is_valid():
+                    par_serializer.save()
+                else:
+                    print(par_serializer.errors)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -191,8 +196,14 @@ class ProceedingDetail(APIView):
         proceeding = self.get_object(pk)
         serializer = ProceedingSerializer(proceeding, data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            print(serializer.data)
+            proceeding_obj = serializer.save()
+            Participant.objects.filter(proceeding=proceeding_obj.pk).delete()
+            for par in request.data['participants']:
+                par_serializer = ParticipatsSerializerMain(data={'proceeding':proceeding_obj.pk, 'member':par})
+                if par_serializer.is_valid():
+                    par_serializer.save()
+                else:
+                    print(par_serializer.errors)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -200,6 +211,33 @@ class ProceedingDetail(APIView):
         proceeding = self.get_object(pk)
         proceeding.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ParticipantList(APIView):
+
+    def get(self, request):
+        userid = request.user.id
+        if not userid:
+            return Response("کاربر را مشخص کنید.", status=status.HTTP_400_BAD_REQUEST)
+        signed = request.GET.get('signed', '')
+        qset = Participant.get_proceedings_bysigned(userid, signed)        
+        serial_qset = ProceedingKartablSerializer(qset, many=True)
+        # return a Json response
+        return JsonResponse(serial_qset.data, safe=False)
+
+class ParticipantDetail(APIView):
+
+    def put(self, request, pk):
+        try:
+            participant = Participant.objects.get(member=request.user.stockholder.employee.id, proceeding=pk)
+            new_participant = copy(participant)
+            new_participant.is_signed = True
+            serializer = ParticipatsSerializer(participant, model_to_dict(new_participant))
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response("Error in signing proceeding.", status=status.HTTP_400_BAD_REQUEST)
 
 class ResolutionList(APIView):
 

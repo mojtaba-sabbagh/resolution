@@ -6,6 +6,7 @@
   import Proceeding from './components/Proceeding.vue';
   import Resolution from './components/Resolution.vue';
   import Search from './components/Search.vue';
+  import Kartabl from './components/Kartabl.vue';
   import Login from './components/Login.vue';
   import axios from 'axios';
   import { serverUrl } from '../settings';
@@ -32,6 +33,7 @@
       Resolution,
       Search,
       Login,
+      Kartabl,
     },
     computed:{
       fullname() {
@@ -153,7 +155,12 @@
             <span class="text-sm"> جستجوی مصوبات </span>
           </div>
         </a>
-      
+        <a v-if="loggedIn" class="block mt-5 py-2  hover:bg-red-100" href="#" @click="activeSec=6">
+          <div class="grid justify-items-center">
+             <img class="w-12" src="images/inbox.png"/> 
+            <span class="text-sm"> کارتابل </span>
+          </div>
+        </a>
       </div>
       <div class="border-2 basis-11/12">  
         <Base v-if="activeSec == 0" @loginForm="()=>activeSec=5" isLoggin="loggedIn"/>
@@ -162,6 +169,7 @@
         <Resolution v-if="activeSec == 3" />
         <Search v-if="activeSec == 4" />
         <Login v-if="activeSec == 5" @onLogin="loggingIn"/>
+        <Kartabl v-if="activeSec == 6" />
       </div>
     </div>
   </div>

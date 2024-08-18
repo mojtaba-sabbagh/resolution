@@ -16,6 +16,7 @@ class Stockholder(models.Model):
     national_id = models.CharField(max_length=10, unique=True, blank=True, null=True)
     email = models.CharField(max_length=255, blank=True, null=True)
     mobile = models.CharField(max_length=11, blank=True, null=True)
+    signature = models.FileField(upload_to='signatures/', max_length=254, blank=True, null=True)
 
     def __str__(self):
         return f"{self.last_name} {self.first_name}"
@@ -109,13 +110,38 @@ class Proceeding(models.Model):
     pdate = models.DateField()
     ptime = models.TimeField(blank=True, null=True)
     loc = models.CharField(max_length=255, blank=True, null=True)
-    participants =  models.ManyToManyField(Employee)
+    participants =  models.ManyToManyField(Employee, through='Participant')
     meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE)
     readonly = models.BooleanField(default=False)
     upload = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.meeting} - {self.proceeding_no} - {date2jalali(self.pdate).strftime('%Y/%m/%d')}"
+
+class Participant(models.Model):
+    proceeding = models.ForeignKey(Proceeding, on_delete=models.CASCADE)
+    member = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    date_signed = models.DateField(blank=True, null=True)
+    is_signed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.proceeding}-{self.member}"
+    
+    @staticmethod
+    def get_user_proceedings(user, sign=''):
+        logged_user = User.objects.get(id=user)
+        logged_stockholder = Stockholder.objects.get(user=logged_user)
+        logged_employee = Employee.objects.get(stockholder=logged_stockholder)
+        if sign == '':
+            return Participant.objects.filter(member=logged_employee)
+        elif sign == 'f':
+            return Participant.objects.filter(member=logged_employee, is_signed=False)
+        else: return Participant.objects.filter(member=logged_employee, is_signed=True)
+
+    @staticmethod
+    def get_proceedings_bysigned(user, sign):
+        user_proceedings = [part.proceeding.id for part in Participant.get_user_proceedings(user, sign)]
+        return Proceeding.objects.filter(id__in=user_proceedings)
 
 class Resolution(models.Model):
     STOCKHOLDER_CHOICE = (
