@@ -30,11 +30,10 @@
             type: Boolean,
             default: false,
         },
-        value: "",
+        dateValue: null,
     },
     data() {
        return {
-            date:'',
             hasError: false,
             entered : false,
         }
@@ -42,23 +41,22 @@
     computed: {
     },
     methods: {
-         constraint() {
+        constraint() {
             this.entered = true;
-            if (this.required & this.date==""){
+            if (this.required & this.dateValue==""){
                 this.hasError = true;
             } 
             else {
                 this.hasError = false;
             }
-            this.$emit('onChangeValue', this.date);
+            this.$emit('onChangeValue', this.dateValue);
             this.$emit('onStateChange', this.hasError, this.order);
-      },
+        },
     },
     components: {
         DatePicker,
     },
     created() {
-        this.date = this.value;
     },
   }
 </script>
@@ -72,7 +70,7 @@
            {{ label_title }}
             <p class="inline text-xl text-red-700 dark:text-red-500"><span v-if="required"> * </span></p>
         </label>
-        <DatePicker v-model="date" @change="constraint" 
+        <DatePicker v-model="dateValue" @change="constraint" 
             :disabled="disabled" :required="required"
            class="font-farsi border text-sm rounded-lg p-1.5
            bg-white-50 border-gray-500 text-gray-900 placeholder-gray-200 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-100 dark:border-gray-400"

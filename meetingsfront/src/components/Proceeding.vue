@@ -110,6 +110,7 @@
             return name;
           },
           getProceedings(meetingId){
+            this.blankForm();
             this.meetingName = this.findOptionsText(this.meetingNamesOptions, meetingId);
             axios({
                     method: 'get',
@@ -128,13 +129,12 @@
                 });
           },
           addProceedingAPI(){
-            console.log(this.participants);
             if (this.manipulationMode == 0){
                 axios.post(serverUrl+'api/proceedings/', {'proceeding_no':this.proceedingNo, 'pdate':this.toGregorianDate(this.pDate),
                             'ptime':`${this.pTime.HH}:${this.pTime.mm}`, 'loc':this.loc, 'readonly':this.preadonly, 'meeting':this.meetingId, 
                             'participants':this.participants, 'upload':this.fileName})
                     .then(response => {
-                        this.blankForm();
+                        //this.blankForm();
                         this.getProceedings(this.meetingId);
                         this.$toast.success('تغییرات ذخیره شد.');
                     })
@@ -172,6 +172,7 @@
           fillproceedingForm(proceedingData){
             this.proceedingNo = proceedingData.proceeding_no;
             this.pDate = this.toPersianDate(proceedingData.pdate);
+            console.log(this.pDate);
             let timeDetails = proceedingData.ptime.split(':');
             this.pTime.HH = timeDetails[0];
             this.pTime.mm = timeDetails[1];
@@ -179,8 +180,9 @@
             this.preadonly = proceedingData.readonly;
             this.participants = proceedingData.participants;
             this.proceedingId = proceedingData.id;
-            if (proceedingData.upload != ''){
+            if (proceedingData.upload){
                 this.fileUploaded = true;
+                this.fileName = proceedingData.upload;
                 this.proceedingLink = this.createLink(proceedingData.upload);
             }
             this.resetMessages();
@@ -281,7 +283,7 @@
                 .then(() => {
                  this.fileUploaded = true;
                  this.proceedingLink = this.createLink(this.fileName);
-                 this.$toast.success('فایل صورتجلسه با موفقیت بارگذاری شد.');
+                 this.$toast.success('فایل صورتجلسه با موفقیت بارگذاری شد. بروزرسانی انجام شود.');
                 })
                 .catch(() => {
                     this.$toast.error('خطایی در بارگذاری فایل صورتجلسه اتفاق افتاد.');
@@ -317,7 +319,19 @@
                     document.body.removeChild(link);
                     URL.revokeObjectURL(href);
                 });
-        }
+        },
+        deleteFileProceeding(){
+            axios.delete(serverUrl+`api/procupload/${this.meetingName}/?upload=${this.fileName}`)
+                .then((response) => {
+                    this.fileUploaded = false;
+                    this.proceedingLink = '';
+                    this.$toast.success('فایل صورتجلسه با موفقیت حذف شد. بروزرسانی انجام شود.');
+                })
+                .catch(() => {
+                    this.$toast.error('خطایی در حذف فایل صورتجلسه اتفاق افتاد.');
+                    this.fileUploaded = true;
+                });
+        },
         },
         created(){
           axios.defaults.withCredentials = true;
@@ -357,13 +371,13 @@
                 <div class="border border-gray-500 mt-5 pb-5 mx-5">
                     <form v-on:submit.prevent="">
                         <div class="md:flex md:flex-row gap-4 mt-5 items-center">
-                            <InputText  class="w-5/6 mx-4" v-model:value="proceedingNo" :disabled="preadonly"
+                            <InputText  class="w-5/6 mx-4" :value="proceedingNo" :disabled="preadonly"
                                 @onChangeValue="updateNo" label_title="شماره صورتجلسه" input_placeholder="شماره صورتجلسه" />
-                            <DateInput class="w-5/6 mx-4" label_title="تاریخ صورتجلسه"  v-model:value="pDate" 
+                            <DateInput class="w-5/6 mx-4" label_title="تاریخ صورتجلسه"  :dateValue="pDate" 
                                  l2r @onChangeValue="updatePDate" :disabled="preadonly" />
-                            <TimeInput class="w-5/6 mx-4" label_title="ساعت صورتجلسه"  v-model:timeValue="pTime" 
+                            <TimeInput class="w-5/6 mx-4" label_title="ساعت صورتجلسه"  :timeValue="pTime" 
                                  l2r @onChangeValue="updatePTime" :disabled="preadonly" />
-                            <InputText  class="w-5/6 mx-4" v-model:value="loc" :disabled="preadonly"
+                            <InputText  class="w-5/6 mx-4" :value="loc" :disabled="preadonly"
                                 @onChangeValue="updateLoc" label_title="مکان جلسه" input_placeholder="سال هنری" />
                             
                             <!--Toggle v-model:value="preadonly"  @onChangeValue="updateReadonly" class="w-5/6 md:w-1/4" 
@@ -405,6 +419,9 @@
                                 disabled:bg-slate-50 disabled:text-slate-300 hover:border text-sm rounded-lg" 
                                 @click="downloadProceeding(proceedingLink)" :disabled="preadonly" > 
                                 دانلود فایل صورتجلسه 
+                            </button>
+                            <button v-if="fileUploaded" class="block-inline flex justify-center hover:bg-red-100 p-1 mb-1" @click="deleteFileProceeding">
+                                <img class="w-6 opacity-60" title="حذف فایل صورتجلسه" src="images/minus.png"/>
                             </button>
                         </div>
                         

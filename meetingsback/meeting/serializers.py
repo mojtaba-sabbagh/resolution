@@ -187,10 +187,14 @@ class ResolutionZinafSerializer(serializers.ModelSerializer):
     proceedingdate = serializers.SerializerMethodField()
     def get_proceedingdate(self, obj):
         return date2jalali(obj.proceeding.pdate).strftime('%Y/%m/%d')
+    proceeding_no = serializers.SerializerMethodField()
+    def get_proceeding_no(self, obj):
+        return obj.proceeding.proceeding_no
+    
     class Meta:
         model = Resolution
         fields = ('id','item_no', 'act_text','resolution_type', 'result', 'proceeding', 'stockholder_type',
-                  'stockholder', 'zinaf', 'fullname', 'gender', 'meeting', 'proceedingdate')
+                  'stockholder', 'zinaf', 'fullname', 'gender', 'meeting', 'proceedingdate', 'proceeding_no')
 
 class stockholderSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()

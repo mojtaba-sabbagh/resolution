@@ -150,9 +150,12 @@ def cerate_proceeding(request, pk):
     rows.append(ps)
     rows.append(pos_line)
     rows.append(sign_line)
-    table = Table(rows, colWidths=130, rowHeights=10)
-    table.setStyle(tableStyle)
-    storys.append(table)
+    try:
+        table = Table(rows, colWidths=130, rowHeights=10)
+        table.setStyle(tableStyle)
+        storys.append(table)
+    except:
+        pass
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize = A4)

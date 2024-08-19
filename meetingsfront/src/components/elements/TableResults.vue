@@ -1,5 +1,7 @@
 <script>
 import Buttons from './Buttons.vue';
+import axios from 'axios';
+import { serverUrl } from '../../../settings';
     export default {
         components: { Buttons },
 
@@ -8,7 +10,46 @@ import Buttons from './Buttons.vue';
             offset: 0,
         },
         methods:{
-            
+            downloadFile(downloadUrl) {
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.setAttribute('download', 'proceeding.pdf');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            },
+            downloadAttachProc(url){
+                axios({
+                    method: 'get',
+                    url: serverUrl+`api/downloadproc/${url}/`,
+                    headers: {"Content-Type": "application/json"},
+                    responseType: 'blob',
+                    })
+                .then(response => {
+                    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+                    this.downloadFile(downloadUrl)
+                })
+                .catch(error => {
+                    this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
+                    this.$toast.error('خطا در واکشی اطلاعات از سامانه رخ داد.');
+                });
+            },
+            printProceeding(proceedingId) {
+                axios({
+                    method: 'get',
+                    url: serverUrl+`api/printproc/${proceedingId}/`,
+                    headers: {"Content-Type": "application/json"},
+                    responseType: 'blob',
+                    })
+                .then(response => {
+                    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+                    this.downloadFile(downloadUrl)
+                })
+                .catch(error => {
+                    this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
+                    this.$toast.error('خطا در واکشی اطلاعات از سامانه رخ داد.');
+                });
+            },
         },
     }
 </script>
@@ -44,6 +85,9 @@ import Buttons from './Buttons.vue';
                      <th scope="col" class="hidden md:table-cell text-sm font-medium font-bold text-gray-900 px-6 py-4 text-center">
                         نام ذینفع
                     </th>
+                    <th scope="col" class="hidden md:table-cell text-sm font-medium font-bold text-gray-900 px-6 py-4 text-center">
+                        دانلود
+                    </th>
 
                     </tr>
                 </thead>
@@ -56,7 +100,7 @@ import Buttons from './Buttons.vue';
                             {{ row.meeting }}
                         </td>
                         <td class="hidden md:table-cell text-sm text-gray-800 font-light px-6 py-4">
-                            {{ row.proceeding }}
+                            {{ row.proceeding_no }}
                         </td>
                         <td class="hidden md:table-cell text-sm text-gray-800 font-light px-6 py-4">
                             {{ row.proceedingdate }}
@@ -72,6 +116,17 @@ import Buttons from './Buttons.vue';
                         </td>
                         <td class="hidden md:table-cell text-sm text-gray-800 font-light px-6 py-4">
                            {{ row.fullname }}
+                        </td>
+                        <td class="hidden md:table-cell text-sm text-gray-800 font-light px-6 py-4">
+                            <button class="block-inline disabled:bg-gray-100" title="دانلود صورتجلسه الکترونیکی"  name="1"
+                                    @click="printProceeding(row.id)">
+                                    <img class="opacity-60 hover:bg-red-100 w-9 p-1" src="images/print.png"/>
+                            </button>
+                            <button class="block-inline disabled:bg-gray-100" title="دانلود پیوست صورتجلسه"  name="2"
+                                    @click="downloadAttachProc(row.upload)" :disabled="!row.upload">
+                                    <img v-show="row.upload" class="opacity-60 hover:bg-red-100 w-9 p-1" src="images/electronic-proc.png"/>
+                                    <img v-show="!row.upload" class="opacity-60 hover:bg-red-100 w-9 p-1" src="images/not-exist.png"/>
+                            </button>
                         </td>
                     </tr>
                 </tbody>

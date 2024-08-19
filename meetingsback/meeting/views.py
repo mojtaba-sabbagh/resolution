@@ -24,6 +24,8 @@ from django.forms.models import model_to_dict
 
 import io
 import os
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.http import FileResponse
@@ -438,7 +440,6 @@ class FileUploadView(APIView):
     parser_classes = (FileUploadParser, )
 
     def post(self, request, meeting):
-
         up_file = request.FILES['file']
         try:
             os.mkdir(f'{settings.BASE_DIR}/meeting/assets/{meeting}/')
@@ -452,6 +453,15 @@ class FileUploadView(APIView):
         #destination.close()  # File should be closed only after all chuns are added
         #image = fs.url(filename)
         return Response(up_file.name, status.HTTP_201_CREATED)
+    
+    def delete(self, request, meeting):
+        filename = request.GET.get('upload', '')
+        fullpath = os.path.join(BASE_DIR, 'assets', filename)
+        if os.path.exists(fullpath):
+            os.remove(fullpath)
+        else:
+            return Response(filename, status.HTTP_404_NOT_FOUND)
+        return Response(filename, status.HTTP_200_OK)
 
 
 def download_file(request, foldername, filename):
