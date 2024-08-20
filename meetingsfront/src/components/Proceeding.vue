@@ -149,7 +149,7 @@
                             'pdate': this.toGregorianDate(this.pDate), 'ptime':`${this.pTime.HH}:${this.pTime.mm}`, 
                             'participants':this.participants, 'upload':this.fileName})
                     .then(response => {
-                        this.getProceedings(this.meetingId);
+                        //this.getProceedings(this.meetingId);
                         this.$toast.success('تغییرات ذخیره شد.');
                     })
                     .catch(error => {
