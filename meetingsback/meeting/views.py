@@ -439,26 +439,30 @@ class StockholderDetail(APIView):
 class FileUploadView(APIView):
     parser_classes = (FileUploadParser, )
 
-    def post(self, request, meeting):
+    def post(self, request, proceeding):
         up_file = request.FILES['file']
+        proc = Proceeding.objects.get(id=proceeding)
+        meeting = proc.meeting.meeting_name
+        print(meeting)
         try:
-            os.mkdir(f'{settings.BASE_DIR}/meeting/assets/{meeting}/')
+            os.mkdir(f'{BASE_DIR}/assets/{meeting}/')
         except:
             pass
         #destination = open(f'{settings.BASE_DIR}/meeting/assets/{meeting}/{up_file.name}', 'wb+')
-        destination = FileSystemStorage(location=f'{settings.BASE_DIR}/meeting/assets/{meeting}')
+        destination = FileSystemStorage(location=f'{BASE_DIR}/assets/{meeting}')
         filename = destination.save(up_file.name, up_file)
-        #for chunk in up_file.chunks():
-        #    destination.write(chunk)
-        #destination.close()  # File should be closed only after all chuns are added
-        #image = fs.url(filename)
+        proc.upload = f"{meeting}/{filename}"
+        proc.save()
         return Response(up_file.name, status.HTTP_201_CREATED)
     
-    def delete(self, request, meeting):
-        filename = request.GET.get('upload', '')
+    def delete(self, request, proceeding):
+        proc = Proceeding.objects.get(id=proceeding)
+        filename = proc.upload
         fullpath = os.path.join(BASE_DIR, 'assets', filename)
         if os.path.exists(fullpath):
             os.remove(fullpath)
+            proc.upload = ''
+            proc.save()
         else:
             return Response(filename, status.HTTP_404_NOT_FOUND)
         return Response(filename, status.HTTP_200_OK)

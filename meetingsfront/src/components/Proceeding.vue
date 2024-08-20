@@ -22,7 +22,7 @@
             proceedingId: 0,
             proceedingNo: 0,
             pDate:'',
-            pTime:{'HH':'10', 'mm':'00'},
+            pTime: "", //{'HH':'10', 'mm':'00'},
             loc:'',
             meetingName: '',
             proceedingName: '',
@@ -33,7 +33,6 @@
             buttonLabel: 'تایید',
             preadonly: false,
             errorMessage: '',
-
             fileName: '',
             fileUploaded: false,
             proceedingLink: '',
@@ -82,6 +81,10 @@
                         this.$toast.error('خطا در واکشی اطلاعات از سامانه رخ داد.');
                 });
           },
+          onMeetinChange(meetingId){
+            this.getProceedings(meetingId)
+            this.blankForm();
+          },
           getProceedingAPI(proceedingId){
              axios({
                     method: 'get',
@@ -110,7 +113,7 @@
             return name;
           },
           getProceedings(meetingId){
-            this.blankForm();
+            //this.blankForm();
             this.meetingName = this.findOptionsText(this.meetingNamesOptions, meetingId);
             axios({
                     method: 'get',
@@ -131,8 +134,8 @@
           addProceedingAPI(){
             if (this.manipulationMode == 0){
                 axios.post(serverUrl+'api/proceedings/', {'proceeding_no':this.proceedingNo, 'pdate':this.toGregorianDate(this.pDate),
-                            'ptime':`${this.pTime.HH}:${this.pTime.mm}`, 'loc':this.loc, 'readonly':this.preadonly, 'meeting':this.meetingId, 
-                            'participants':this.participants, 'upload':this.fileName})
+                            'ptime':this.pTime, 'loc':this.loc, 'readonly':this.preadonly, 'meeting':this.meetingId, 
+                            'participants':this.participants, 'upload':this.fileName}) //`${this.pTime.HH}:${this.pTime.mm}`
                     .then(response => {
                         //this.blankForm();
                         this.getProceedings(this.meetingId);
@@ -146,10 +149,10 @@
             else {
                 axios.put(serverUrl+'api/proceedings/'+this.proceedingId+'/',{'proceeding_no':this.proceedingNo, 
                             'loc':this.loc, 'readonly':this.preadonly, 'meeting':this.meetingId, 
-                            'pdate': this.toGregorianDate(this.pDate), 'ptime':`${this.pTime.HH}:${this.pTime.mm}`, 
-                            'participants':this.participants, 'upload':this.fileName})
+                            'pdate': this.toGregorianDate(this.pDate), 'ptime': this.pTime, 
+                            'participants':this.participants, 'upload':this.fileName}) //`${this.pTime.HH}:${this.pTime.mm}`
                     .then(response => {
-                        //this.getProceedings(this.meetingId);
+                        this.getProceedings(this.meetingId);
                         this.$toast.success('تغییرات ذخیره شد.');
                     })
                     .catch(error => {
@@ -172,18 +175,20 @@
           fillproceedingForm(proceedingData){
             this.proceedingNo = proceedingData.proceeding_no;
             this.pDate = this.toPersianDate(proceedingData.pdate);
-            console.log(this.pDate);
-            let timeDetails = proceedingData.ptime.split(':');
-            this.pTime.HH = timeDetails[0];
-            this.pTime.mm = timeDetails[1];
+            //let timeDetails = proceedingData.ptime.split(':');
+            //this.pTime.HH = timeDetails[0];
+            this.pTime = proceedingData.ptime;//.mm = timeDetails[1];
             this.loc = proceedingData.loc;
             this.preadonly = proceedingData.readonly;
             this.participants = proceedingData.participants;
             this.proceedingId = proceedingData.id;
+
             if (proceedingData.upload){
-                this.fileUploaded = true;
-                this.fileName = proceedingData.upload;
-                this.proceedingLink = this.createLink(proceedingData.upload);
+                this.fileName = proceedingData.upload.trim()
+                if (this.fileName != ''){
+                    this.fileUploaded = true;
+                    this.proceedingLink = this.createLink(this.fileName);
+                }
             }
             this.resetMessages();
           },
@@ -194,8 +199,9 @@
            this.pDate = newValue; 
           },
           updatePTime(newValue){
-           this.pTime.HH = newValue.HH;
-           this.pTime.mm = newValue.mm;
+           //this.pTime.HH = newValue.HH;
+           //this.pTime.mm = newValue.mm;
+           this.pTime = newValue;
           },
           updateLoc(newValue){
             this.loc = newValue;
@@ -220,6 +226,7 @@
             this.manipulationMode = 0;
             this.proceedingId = 0;
             this.fileUploaded = false;
+            this.fileName = '';
             this.proceedingLink = '';
             this.resetMessages();
           },
@@ -268,12 +275,12 @@
             const file = e.target.files[0]
             let fileExtention = file.name.split(".").pop();
             let filename = this.proceedingName.replaceAll(' ', '').replaceAll('/', '-').replaceAll('\\', '-')+`.${fileExtention}`;
-            let foldername = this.meetingName.replaceAll(' ', '-');
+            let foldername = this.meetingName //.replaceAll(' ', '-');
             const formData = new FormData();
             formData.append("file", e.target.files[0]);
             this.fileName = `${foldername}/${filename}`;
             axios
-                .post(serverUrl+`api/procupload/${foldername}/`, formData,
+                .post(serverUrl+`api/procupload/${this.proceedingId}/`, formData,
                 {
                     headers: {
                     'Content-Type': "image/jpeg;charset=UTF-8",
@@ -321,7 +328,7 @@
                 });
         },
         deleteFileProceeding(){
-            axios.delete(serverUrl+`api/procupload/${this.meetingName}/?upload=${this.fileName}`)
+            axios.delete(serverUrl+`api/procupload/${this.proceedingId}/`)
                 .then((response) => {
                     this.fileUploaded = false;
                     this.proceedingLink = '';
@@ -340,9 +347,8 @@
         computed: {
             isDisabled() {
                 // evaluate whatever you need to determine disabled here...
-                if (this.proceedingNo == '' || this.pDate == '')
+                if (this.proceedingNo == '' || this.pDate == '' || this.participants.length == 0 || this.preadonly)
                     return true;
-                if (this.preadonly) return true;
                 return false;
              },
         }
@@ -354,7 +360,7 @@
         <span class="block-inline text-lg hover:text-blue-500 p-2 border-2 bg-red-100"> مدیریت صورتجلسه </span>
         <div class="flex flex-col font-farsi items-stretch items-center">
             <div class="flex flex-col md:flex-row items-end">
-                <DropDown class="mt-5 md:mt-10 mx-5 w-4/5 md:w-2/5" label_title="جلسات موجود"  @onChangeValue="getProceedings"
+                <DropDown class="mt-5 md:mt-10 mx-5 w-4/5 md:w-2/5" label_title="جلسات موجود"  @onChangeValue="onMeetinChange"
                     :options="meetingNamesOptions" v-model:itemSelected="meetingId"/>
                 <DropDown v-if="meetingId" class="mt-3 md:mt-10 mx-5 w-4/5 md:w-2/5" label_title="صورتجلسات موجود"  @onChangeValue="getProceeding"
                     :options="proceedingNameOptions" :itemSelected="proceedingId"/>

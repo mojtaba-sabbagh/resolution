@@ -37,6 +37,6 @@ urlpatterns = [
     path('login/', views.LoginView.as_view()),
     path('logout/', views.LogoutView.as_view()),
     path('profile/', views.StockholderDetail.as_view()),
-    path('procupload/<str:meeting>/', views.FileUploadView.as_view()),
+    path('procupload/<int:proceeding>/', views.FileUploadView.as_view()),
     path('downloadproc/<str:foldername>/<str:filename>/', views.download_file),
 ]

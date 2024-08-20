@@ -30,18 +30,21 @@
             type: Boolean,
             default: false,
         },
-        timeValue: {
-                HH: '20',
-                mm: ''
-            },
+      //  timeValue: {
+      //          HH: '20',
+      //          mm: ''
+      //      },
+        timeValue: String,
     },
     components: {
+        //VueTimepicker,
         VueTimepicker,
     },
     data() {
        return {
             hasError: false,
             entered : false,
+            timeFormat: 'hh:mm',
         }
     },
     methods: {
@@ -65,8 +68,18 @@
            {{ label_title }}
             <p class="inline text-xl text-red-700 dark:text-red-500"><span v-if="required"> * </span></p>
         </label>
-        <VueTimepicker v-model="timeValue" @change="constraint"  
+        <!--VueTimepicker  v-model="timeValue" @change="constraint"  
             :disabled="disabled" :required="required"
+           class="font-farsi border text-sm rounded-lg p-1.5
+           bg-white-50 border-gray-500 text-gray-900 placeholder-gray-200 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-100 dark:border-gray-400"
+           v-bind:class="{ 'bg-green-50 border-green-500 text-green-900 placeholder-green-200 focus:ring-green-500 focus:border-green-500 dark:bg-green-100 dark:border-green-400'
+                           : !hasError & entered,
+                            'bg-red-50 border-red-500 text-red-900 placeholder-red-200 focus:ring-red-500 focus:border-red-500 dark:bg-red-100 dark:border-red-400'
+                           : hasError,
+                           'ltr-grid': l2r}"/-->
+        
+        <input type="time" v-model="timeValue" step="1"
+        @change="constraint"  :disabled="disabled" :required="required"
            class="font-farsi border text-sm rounded-lg p-1.5
            bg-white-50 border-gray-500 text-gray-900 placeholder-gray-200 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-100 dark:border-gray-400"
            v-bind:class="{ 'bg-green-50 border-green-500 text-green-900 placeholder-green-200 focus:ring-green-500 focus:border-green-500 dark:bg-green-100 dark:border-green-400'
