@@ -243,6 +243,18 @@
           addParticipant(){
             this.participants.push(0);
           },
+          checkParticipants(){
+            if (this.participants.length == 0){
+                return false;
+            }
+            for(const m of this.participants) {
+                console.log(m);
+                if (m == 0){
+                    return false;
+                }
+            }
+            return true;
+          },
           addParticipants(){
             for(const element of this.employeeOptions) {
                 this.participants.push(element.ID);
@@ -347,7 +359,7 @@
         computed: {
             isDisabled() {
                 // evaluate whatever you need to determine disabled here...
-                if (this.proceedingNo == '' || this.pDate == '' || this.participants.length == 0 || this.preadonly)
+                if (this.proceedingNo == '' || this.pDate == '' || !this.checkParticipants() || this.preadonly)
                     return true;
                 return false;
              },

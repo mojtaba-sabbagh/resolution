@@ -109,6 +109,7 @@
                         this.blankForm();
                         this.meetingsName();
                         this.$toast.success('جلسه با موفقیت ذخیره گردید.');
+                        this.errorMessage = '';
                     })
                     .catch(error => {
                         this.errorMessage = error //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
@@ -120,6 +121,7 @@
                     .then(response => {
                         this.meetingsName();
                         this.$toast.success('جلسه با موفقیت ذخیره گردید.');
+                        this.errorMessage = '';
                     })
                     .catch(error => {
                         this.errorMessage = error //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
@@ -172,6 +174,7 @@
                     this.meetingsName();
                     this.blankForm();
                     this.$toast.success('جلسه حذف گردید.');
+                    this.errorMessage = '';
                 })
             .catch(error => {
                     this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
@@ -189,6 +192,7 @@
                 .then(response => {
                     this.members.splice(row, 1);
                     this.$toast.success('عضو حذف گردید.');
+                    this.errorMessage = '';
                     })
                 .catch(error => {
                     this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
@@ -211,9 +215,10 @@
                                                         'role':this.members[row].role, 'meeting':this.meetingId})
                 .then(response => {
                     this.$toast.success('تغییرات ذخیره شد.');
+                    this.errorMessage = '';
                     })
                 .catch(error => {
-                    this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
+                    this.errorMessage = error; 
                     this.$toast.error('خطا در برقرار ارتباط با سامانه رخ داد.');
                     console.log(memId, row);
                     });
@@ -227,18 +232,19 @@
                         }
                         else {
                             this.$toast.success('تغییرات ذخیره شد.');
+                            this.errorMessage = '';
                         }
                     })
                     .catch(error => {
-                        this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
-                        this.$toast.error('خطا در برقرار ارتباط با سامانه رخ داد.');
+                        this.errorMessage = error;
+                        this.$toast.error('اطلاعات عضو کامل نیست.');
                     });
             }
           },
           saveMember(event){
             let row = parseInt(event.currentTarget.getAttribute('row'));
             let memId = this.members[row].id;
-            this.saveAPI(memId, row);
+            this.saveAPI(memId, row); 
           },
           saveAllMembers(){
            // this.members.forEach(function (member, row) {

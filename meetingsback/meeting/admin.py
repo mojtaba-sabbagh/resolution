@@ -1,7 +1,8 @@
 from django.contrib import admin
 # Register your models here.
 
-from .models import Stockholder, Student, Employee, Meeting, Membership, Proceeding, Resolution, ResolutionType
+from .models import Stockholder, Student, Employee, Meeting, Membership,\
+      Proceeding, Resolution, ResolutionType, Participant
 
 @admin.register(Stockholder)
 class StockholderAdmin(admin.ModelAdmin):
@@ -25,6 +26,10 @@ class MembershipAdmin(admin.ModelAdmin):
 
 @admin.register(Proceeding)
 class ProceedingAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)
+
+@admin.register(Participant)
+class ParticipantAdmin(admin.ModelAdmin):
     readonly_fields = ('id',)
 
 @admin.register(Resolution)

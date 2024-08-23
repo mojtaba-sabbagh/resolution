@@ -124,6 +124,9 @@ class Participant(models.Model):
     date_signed = models.DateField(blank=True, null=True)
     is_signed = models.BooleanField(default=False)
 
+    class Meta:
+        unique_together = ('proceeding', 'member')
+        
     def __str__(self):
         return f"{self.proceeding}-{self.member}"
     
