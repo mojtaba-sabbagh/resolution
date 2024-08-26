@@ -248,7 +248,6 @@
                 return false;
             }
             for(const m of this.participants) {
-                console.log(m);
                 if (m == 0){
                     return false;
                 }
@@ -286,8 +285,8 @@
         onFileChange(e) {
             const file = e.target.files[0]
             let fileExtention = file.name.split(".").pop();
-            let filename = this.proceedingName.replaceAll(' ', '').replaceAll('/', '-').replaceAll('\\', '-')+`.${fileExtention}`;
-            let foldername = this.meetingName //.replaceAll(' ', '-');
+            let filename = this.proceedingId+`.${fileExtention}`; 
+            let foldername = this.meetingId
             const formData = new FormData();
             formData.append("file", e.target.files[0]);
             this.fileName = `${foldername}/${filename}`;
@@ -304,8 +303,9 @@
                  this.proceedingLink = this.createLink(this.fileName);
                  this.$toast.success('فایل صورتجلسه با موفقیت بارگذاری شد. بروزرسانی انجام شود.');
                 })
-                .catch(() => {
+                .catch((error) => {
                     this.$toast.error('خطایی در بارگذاری فایل صورتجلسه اتفاق افتاد.');
+                    this.errorMessage = error;
                     this.fileUploaded = false;
                 });
         },
@@ -344,13 +344,38 @@
                 .then((response) => {
                     this.fileUploaded = false;
                     this.proceedingLink = '';
-                    this.$toast.success('فایل صورتجلسه با موفقیت حذف شد. بروزرسانی انجام شود.');
+                    this.$toast.success('پیوست صورتجلسه با موفقیت حذف شد.');
                 })
                 .catch(() => {
-                    this.$toast.error('خطایی در حذف فایل صورتجلسه اتفاق افتاد.');
+                    this.$toast.error('خطایی در حذف پیوست صورتجلسه اتفاق افتاد.');
                     this.fileUploaded = true;
                 });
         },
+        downloadFile() {
+                const link = document.createElement('a');
+                link.href = this.proceedingPDF;
+                link.setAttribute('download', 'proceeding.pdf');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            },
+        printProceeding() {
+                axios({
+                    method: 'get',
+                    url: serverUrl+`api/printproc/${this.proceedingId}/`,
+                    headers: {"Content-Type": "application/json"},
+                    responseType: 'blob',
+                    })
+                .then(response => {
+                    const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
+                    this.proceedingPDF = downloadUrl;
+                    this.downloadFile()
+                })
+                .catch(error => {
+                    this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
+                    this.$toast.error('خطا در واکشی اطلاعات از سامانه رخ داد.');
+                });
+            },
         },
         created(){
           axios.defaults.withCredentials = true;
@@ -426,45 +451,53 @@
                                 <img class="opacity-60 hover:bg-red-100 w-8 p-1" src="images/plus.png"/>
                             </button>
                         </div>
-                        
-                        <div class="mt-5 flex flex-col md:flex-row items-center md:justify-center">
-                            <label class="ml-5 w-4/5 md:w-1/4 mr-4 border bg-white px-5 py-2.5 text-green-700 dark:text-green-500 hover:bg-red-100
-                            border text-sm rounded-lg bg-white-50 border-gray-500 focus:ring-gray-500 focus:border-gray-500 disabled:bg-slate-50 disabled:text-slate-300" 
-                                    for="myfile">انتخاب فایل صورتجلسه
-                                <input type="file" class=" hidden" id="myfile" name="myfile" @change="onFileChange" :disabled="preadonly" /> 
-                            </label>
-                            <button v-if="fileUploaded" class="inline-block mt-6 md:mt-0 hover:bg-red-100 px-5 py-2.5
-                                disabled:bg-slate-50 disabled:text-slate-300 hover:border text-sm rounded-lg" 
-                                @click="downloadProceeding(proceedingLink)" :disabled="preadonly" > 
-                                دانلود فایل صورتجلسه 
-                            </button>
-                            <button v-if="fileUploaded" class="block-inline flex justify-center hover:bg-red-100 p-1 mb-1" @click="deleteFileProceeding">
-                                <img class="w-6 opacity-60" title="حذف فایل صورتجلسه" src="images/minus.png"/>
-                            </button>
-                        </div>
-                        
-                        <button type="submit" @click="addProceedingAPI" class="hover:bg-red-100 mt-7 md:mt-14 w-4/5 md:w-1/2 appearance-none border text-sm text-center rounded-lg p-2.5
+                        <button type="submit" @click="addProceedingAPI" class="hover:bg-red-100 mt-7 md:mt-10 w-4/5 md:w-1/2 appearance-none border text-sm text-center rounded-lg p-2.5
                             bg-red-50 border-gray-500 text-gray-900 placeholder-gray-200 focus:ring-gray-500 
                             focus:border-gray-500 dark:bg-gray-100 dark:border-gray-400 disabled:bg-slate-50 disabled:text-slate-300" :disabled="isDisabled"> 
                             <span> {{ buttonLabel }} </span>
                         </button>
                     </form>
+                        
+                        <div class="mt-5 flex flex-col md:flex-row items-center md:justify-center">
+                            <label class="ml-5 md:mr-4  bg-white text-green-700 dark:text-green-500 
+                             text-sm rounded-lg bg-white-50 border-gray-500 focus:ring-gray-500 focus:border-gray-500 disabled:bg-slate-50 disabled:text-slate-300" 
+                                    for="myfile">
+                                <img class="opacity-100 hover:bg-red-100 w-10 p-1" src="images/upload-proc.png" title="انتخاب فایل پیوست"/>
+                                <input type="file" class=" hidden" id="myfile" name="myfile" @change="onFileChange" :disabled="preadonly" /> 
+                            </label>
+                            <button v-if="fileUploaded" class="inline-block mt-6 md:mt-0 ml-4
+                                disabled:bg-slate-50 disabled:text-slate-300 text-sm rounded-lg" 
+                                @click="downloadProceeding(proceedingLink)" >
+                                <img class="opacity-100 w-10 hover:bg-red-100 p-1" src="images/electronic-proc.png" title="دانلود فایل پیوست"/> 
+                            </button>
+                            <button v-if="fileUploaded" class="inline-block mt-6 md:mt-0 ml-4 hover:bg-red-100
+                                disabled:bg-slate-50 disabled:text-slate-300 text-sm rounded-lg" @click="deleteFileProceeding">
+                                <img class="w-8 p-1" title="حذف فایل پیوست" src="images/delete-proc.png"/>
+                            </button>
+                            <button class="inline-block mt-6 md:mt-0 ml-4 hover:bg-red-100 p-1
+                                disabled:bg-slate-50 disabled:text-slate-300 text-sm rounded-lg" @click="printProceeding">
+                                <img class="w-8 opacity-50" title="چاپ صورتجلسه" src="images/print.png"/>
+                            </button>
+                            <button v-if="!preadonly" class="inline-block mt-6 md:mt-0 ml-4 hover:bg-red-100 p-1
+                                disabled:bg-slate-50 disabled:text-slate-300 text-sm rounded-lg"
+                                data-bs-toggle="modal" data-bs-target="#exampleModal" :disabled="isDisabled">
+                                <img class="w-8 opacity-60" title="قفل صورتجلسه" src="images/lock.png"/>
+                            </button>
+                            <Confirm id="exampleModal" message="درصورت تایید دیگر مشخصات صورتجلسه و مصوبات آن قابل تغییر نخواهد بود، مطمئن هستید؟" 
+                                     title="قفل کردن جلسه" @onYesButtonClick="updateReadonly" @onNoButtonClick="updateReadonly"/>
+                        </div>
+                        
+                       
                     <p class="text-red-500 mt-2"> {{ errorMessage }} </p>
                 </div>
-                <button v-if="!preadonly" type="button" class="hover:bg-red-100 mt-14 w-4/5 md:w-1/2 appearance-none border text-sm text-center rounded-lg p-2.5
+                <!--button v-if="!preadonly" type="button" class="hover:bg-red-100 mt-14 w-4/5 md:w-1/2 appearance-none border text-sm text-center rounded-lg p-2.5
                             bg-red-200 border-gray-500 text-gray-900 placeholder-gray-200 focus:ring-gray-500 
                             focus:border-gray-500 dark:bg-gray-100 dark:border-gray-400 disabled:bg-slate-50 disabled:text-slate-300" 
                                 data-bs-toggle="modal" data-bs-target="#exampleModal" :disabled="isDisabled">
                                 قفل کردن جلسه
                 </button>
                 <Confirm id="exampleModal" message="درصورت تایید دیگر مشخصات صورتجلسه و مصوبات آن قابل تغییر نخواهد بود، مطمئن هستید؟" 
-                                     title="قفل کردن جلسه" @onButtonClick="updateReadonly"/>
-
-                <!-- <div class="flex justify-center">
-                    <div  class="flex items-center justify-center md:w-1/4 my-5 text-black font-farsi text-sm font-bold px-4 py-3" role="alert">
-                        <p v-if="showAlert" class=""> {{ message }} </p>
-                    </div>
-                </div> -->
+                                     title="قفل کردن جلسه" @onYesButtonClick="updateReadonly" @onNoButtonClick="updateReadonly"/-->
             </div>
         </div>
     </div>

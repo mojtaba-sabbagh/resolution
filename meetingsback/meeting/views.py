@@ -236,6 +236,9 @@ class ParticipantDetail(APIView):
             serializer = ParticipatsSerializer(participant, model_to_dict(new_participant))
             if serializer.is_valid():
                 serializer.save()
+                proc = Proceeding.objects.get(id=pk)
+                proc.readonly = True
+                proc.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except:
@@ -442,8 +445,7 @@ class FileUploadView(APIView):
     def post(self, request, proceeding):
         up_file = request.FILES['file']
         proc = Proceeding.objects.get(id=proceeding)
-        meeting = proc.meeting.meeting_name
-        print(meeting)
+        meeting = proc.meeting.id
         try:
             os.mkdir(f'{BASE_DIR}/assets/{meeting}/')
         except:

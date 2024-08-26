@@ -171,19 +171,30 @@ class ResolutionZinafSerializer(serializers.ModelSerializer):
         return obj.proceeding.meeting.meeting_name
     zinaf = serializers.SerializerMethodField()
     def get_zinaf(self, obj):
-        if obj.stockholder_type == Daneshjou:
-            student = Student.objects.get(stockholder=obj.stockholder.id)
-            return student.stdno
-        elif obj.stockholder_type == Karkonan:
-            stockholder = Stockholder.objects.get(id=obj.stockholder.id)
-            return stockholder.national_id
+        try:
+            if obj.stockholder_type == Daneshjou:
+                student = Student.objects.get(stockholder=obj.stockholder.id)
+                return student.stdno
+            elif obj.stockholder_type == Karkonan:
+                stockholder = Stockholder.objects.get(id=obj.stockholder.id)
+                return stockholder.national_id
+        except:
+            pass
         return ''
     fullname = serializers.SerializerMethodField()
     def get_fullname(self, obj):
-        return f"{obj.stockholder.first_name} {obj.stockholder.last_name}"
+        try:
+            return f"{obj.stockholder.first_name} {obj.stockholder.last_name}"
+        except:
+            pass
+        return ''
     gender = serializers.SerializerMethodField()
     def get_gender(self, obj):
-        return obj.stockholder.gender
+        try:
+            return obj.stockholder.gender
+        except:
+            pass
+        return ''
     proceedingdate = serializers.SerializerMethodField()
     def get_proceedingdate(self, obj):
         return date2jalali(obj.proceeding.pdate).strftime('%Y/%m/%d')

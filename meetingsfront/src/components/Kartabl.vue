@@ -6,7 +6,6 @@
     import TableResults from './elements/TableKartabl.vue';
     import axios from 'axios';
     import { serverUrl } from '../../settings';
-    import PersianDate from '@alireza-ab/persian-date';
     import Buttons from './elements/Buttons.vue';
 
 
@@ -25,7 +24,6 @@
         },
         components: {
             DropDown,
-            //InputText,
             DateInput,
             Radio,
             TableResults,

@@ -7,10 +7,10 @@
         },
         methods:{
             yesClicked() {
-                this.$emit('onButtonClick', true);
+                this.$emit('onYesButtonClick', true);
             },
             noClicked() {
-                this.$emit('onButtonClick', false);
+                this.$emit('onNoButtonClick', false);
             },
         },
     }

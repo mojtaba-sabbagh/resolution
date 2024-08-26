@@ -25,7 +25,7 @@
                 resolution_type: '0',
                 result: true,
                 proceeding: 0,
-                stockholder_type: '0',
+                stockholder_type: 'کارکنان',
                 stockholder: '',
                 zinaf: '',
                 fullname: '',
@@ -198,12 +198,13 @@
                 }
             },
             async resolveStockholder(row){
-                //let row = parseInt(event.currentTarget.getAttribute('row'));
                 let stockholderType = this.resolutions[row].stockholder_type;
                 let zinaf = this.resolutions[row].zinaf;
-                if ((stockholderType == '0') || (zinaf == '')){
-                    this.resolutions[row].stockholder = 1;
-                };
+                /* if ((stockholderType == '0') || (zinaf == '')){
+                    stockholderType = 'کارکنان';
+                    this.resolutions[row].stockholder_type = stockholderType;
+                    zinaf = '1234567890';
+                } */
                 try {
                     let sh = await axios.get(serverUrl+`api/resstockholder/?zinaf=${zinaf}&stockholder_type=${stockholderType}`);
                     this.resolutions[row].stockholder = sh.data.stockholder;

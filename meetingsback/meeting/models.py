@@ -148,6 +148,7 @@ class Participant(models.Model):
 
 class Resolution(models.Model):
     STOCKHOLDER_CHOICE = (
+        ('0', 'انتخاب کنید'),
         ('دانشجو', 'دانشجو'),
         ('کارکنان', 'کارکنان'),
     )
@@ -156,8 +157,8 @@ class Resolution(models.Model):
     resolution_type = models.CharField(max_length=255, blank=True, null=True)
     result = models.BooleanField(default=True)
     proceeding = models.ForeignKey(Proceeding, on_delete=models.CASCADE)
-    stockholder_type = models.CharField(max_length=64, choices=STOCKHOLDER_CHOICE)
-    stockholder = models.ForeignKey(Stockholder, on_delete=models.CASCADE)
+    stockholder_type = models.CharField(max_length=64, choices=STOCKHOLDER_CHOICE, blank=True, null=True)
+    stockholder = models.ForeignKey(Stockholder, on_delete=models.CASCADE,  blank=True, null=True)
     
     def __str__(self):
         return f"{self.item_no} - {self.proceeding}"

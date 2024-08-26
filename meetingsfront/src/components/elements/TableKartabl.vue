@@ -2,8 +2,10 @@
 import Buttons from './Buttons.vue';
 import axios from 'axios';
 import { serverUrl } from '../../../settings';
+import Confirm from './Confirm.vue';
+
     export default {
-        components: { Buttons },
+        components: { Buttons, Confirm },
 
         props: {
             rows: null,
@@ -43,7 +45,7 @@ import { serverUrl } from '../../../settings';
                     })
                 .then(response => {
                     const downloadUrl = window.URL.createObjectURL(new Blob([response.data]));
-                    this.downloadFile(downloadUrl)
+                    this.downloadFile(downloadUrl);
                 })
                 .catch(error => {
                     this.errorMessage = error; //'خطایی در گرفتن اطلاعات کاربر رخ داد'; //error.data
@@ -54,25 +56,20 @@ import { serverUrl } from '../../../settings';
                 return `${serverUrl}api/downloadproc/${fileName}/`;
             },
             signProceeding(proeedingid, index){
-                let text = "آیا از امضاء صورتجلسه مطمئن هستید؟ \n برای تایید کلید OK و برای کنسل کلید Cancel را فشار دهید";
-                if (confirm(text) == true) {
-                    axios({
-                        method: 'put',
-                        url: `${serverUrl}api/participants/${proeedingid}/`, 
-                        data: {'is_signed': true},
-                        headers: {"Content-Type": "application/json"},
-                        })
-                    .then(response => {
-                        this.rows.splice(index, 1);
-                        this.$toast.success('صورتجلسه با موفقیت امضاء شد.');
+                axios({
+                    method: 'put',
+                    url: `${serverUrl}api/participants/${proeedingid}/`, 
+                    data: {'is_signed': true},
+                    headers: {"Content-Type": "application/json"},
                     })
-                    .catch(error => {
-                        this.errorMessage = error;
-                        this.$toast.error('خطا در امضاء صورتجلسه اتفاق افتاد.');
-                    });
-                } else {
-                    this.$toast.error('امضاء صورتجلسه لغو شد.');
-                }
+                .then(response => {
+                    this.rows.splice(index, 1);
+                    this.$toast.success('صورتجلسه با موفقیت امضاء شد.');
+                })
+                .catch(error => {
+                    this.errorMessage = error;
+                    this.$toast.error('خطا در امضاء صورتجلسه اتفاق افتاد.');
+                });
             },
         },
         created(){
@@ -140,9 +137,11 @@ import { serverUrl } from '../../../settings';
                         </td>
                         <td class="hidden md:table-cell text-sm text-gray-800 font-light px-6 py-4">
                             <button class="block-inline disabled:bg-gray-100" title="امضاء صورتجلسه" name="3"
-                                    @click="signProceeding(row.id, index)">
+                                     data-bs-toggle="modal" data-bs-target="#exampleModal">
                                     <img class="opacity-60 hover:bg-red-100 w-9 p-1" src="images/signature.png"/>
                             </button>
+                            <Confirm id="exampleModal" message="آیا از امضاء صورتجلسه مطمئن هستید؟" 
+                            title="امضاء صورتجلسه" @onYesButtonClick="signProceeding(row.id, index)"/>
                         </td>
                     </tr>
                 </tbody>
