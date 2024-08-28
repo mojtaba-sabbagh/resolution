@@ -1,38 +1,132 @@
-version: '3.8'
- 
+version: "3.8"
+
 services:
-  meeting:
-    build:
-      context: .
-      dockerfile: Dockerfile
+
+  vru_back:
+    image: 'vru_back:2.4'
     restart: always
     ports:
       - "8000:8000"
+    volumes:
+      - sana_static:/sana_workdir/static
+      - ./media:/sana_workdir/media
+    depends_on:
+      - postgres
     networks:
       - my_network
-    depends_on:
-      - db
-  db:
-    image: postgres:15
-    container_name: postgres
-    volumes:
-      - postgres:/var/lib/postgresql/data
-      - media_root:/app/meeting/assets
-      - meeting_static:/app/static
+
+  vru_front:
+    image: 'vru_front:2.4'
     restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+
+  vru_back_develop:
+    image: 'vru_back:develop'
+    restart: always
+    ports:
+      - "8003:8003"
+    volumes:
+      - sana_static:/sana_workdir/static
+      - ./media:/sana_workdir/media
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+  vru_back_en:
+    image: 'vru_back_en'
+    restart: always
+    ports:
+      - "8004:8004"
+    volumes:
+      - sana_static:/sana_workdir/static
+      - ./media:/sana_workdir/media
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+  park_backend:
+    image: 'park_back:1.1'
+    restart: always
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./park_media:/park_workdir/media
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+
+  park_front:
+    image: 'park_front:1.1'
+    restart: always
+    ports:
+      - "3001:3000"
+    networks:
+      - my_network
+      
+  vru_front_en:
+    image: vru_front_en
+    restart: always
+    ports:
+      - "3002:3000"
+    networks:
+      - my_network
+
+  telbook_api:
+    image: 'golbazkhan/telbook_api:1'
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - telbook_api_static:/app/static
+      - telbook_api_databse:/app/database
+    networks:
+      - my_network
+      
+  meeting:
+    image: meeting
+    restart: always
+    ports:
+      - "8001:8000"
     environment:
       - DATABASE_NAME=meeting
       - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=Msj.116159
+      - DATABASE_PASSWORD=3jQb@4HCPBk3
       - HOST=postgres
       - PORT=5432
-      - SECRET_KEY=django-insecure-)5cl@k5dt7*e8)%1i(6m&8a-g5et7!#oer=gu1qh6^0t($qjy#
     networks:
       - my_network
-  nginx:
-    image: mynginx
-    container_name: mynginxCon
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=3jQb@4HCPBk3
     volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+
+  nginx:
+    image: nginx
+    restart: always
+    volumes:
+      - sana_static:/sana_workdir/static
+      - ./media:/sana_workdir/media
+      - ./park_media:/park_workdir/media
+      - telbook_api_static:/app/static
       - ./nginx:/etc/nginx/conf.d
       - ./nginx_html:/usr/share/nginx/html
     ports:
@@ -42,13 +136,16 @@ services:
     networks:
       - my_network
     depends_on:
-      - meeting
- 
+      - vru_front
+      - telbook_api
+
+
 networks:
   my_network:
     driver: bridge
 
+
 volumes:
-  postgres:
-  media_root:
-  meeting_static:
+  sana_static:
+  telbook_api_static:
+  telbook_api_databse:
