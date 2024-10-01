@@ -16,7 +16,7 @@ Including another URLconf
 from django.urls import path
 from meeting import views
 from .views import resolve_stockholder
-from .pdfmaker import cerate_proceeding
+from . import pdfmaker
 
 urlpatterns = [
     path('meetings/', views.MeetingList.as_view()),
@@ -33,7 +33,7 @@ urlpatterns = [
     path('resolutiontypes/', views.ResolutionTypeList.as_view()),
     path('searchres/', views.SearchRes.as_view()),
     path('resstockholder/', resolve_stockholder),
-    path('printproc/<int:pk>/', cerate_proceeding),
+    path('printproc/<int:pk>/', pdfmaker.PDFMaker.as_view()),
     path('login/', views.LoginView.as_view()),
     path('logout/', views.LogoutView.as_view()),
     path('profile/', views.StockholderDetail.as_view()),
