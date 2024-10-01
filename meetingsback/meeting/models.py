@@ -153,7 +153,7 @@ class Resolution(models.Model):
         ('کارکنان', 'کارکنان'),
     )
     item_no = models.CharField(max_length=64)
-    act_text = models.CharField(max_length=255)
+    act_text = models.TextField()
     resolution_type = models.CharField(max_length=255, blank=True, null=True)
     result = models.BooleanField(default=True)
     proceeding = models.ForeignKey(Proceeding, on_delete=models.CASCADE)
