@@ -214,7 +214,7 @@
                     //this.errorMessage = 'کارمند/دانشجوی مورد نظر پیدا نشد، نامشخص درنظر گرفته می‌شود.';
                     //this.showAlertFunc('کارمند/دانشجوی مورد نظر پیدا نشد، نامشخص درنظر گرفته می‌شود.');
                     this.$toast.error('کارمند/دانشجوی مورد نظر پیدا نشد، نامشخص درنظر گرفته می‌شود.');
-                    this.resolutions[row].stockholder = 1;
+                    this.resolutions[row].stockholder = '';
                 }
             },
 
