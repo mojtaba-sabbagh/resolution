@@ -19,6 +19,7 @@ from textwrap import wrap
 import io
 from pathlib import Path
 import os
+import yaml
 
 
 class PDFMaker(views.APIView):
@@ -38,12 +39,12 @@ class PDFMaker(views.APIView):
 class CreateProceeding:
 
     def __init__(self, proceeding):
+        with open(os.path.join(self.base_dir, 'config/pdf_config.yml'), 'r') as file:
+            self.config = yaml.safe_load(file)
+
         self.proceeding = proceeding
-        self.participant_p_line = 5
         self.spaces = '&nbsp;' * 30
         self.register_fonts()
-        self.space_width = 1
-        self.space_height = 10
         self.tableStyle = TableStyle([
             ('FONTSIZE', (0, 0), (-1, -1), 8),
             ('FONTNAME', (0, 0), (-1, -1), 'Yekan'),
@@ -57,7 +58,14 @@ class CreateProceeding:
 
     def get_response(self):
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=self.config['page_margin']['right_margin'],
+            leftMargin=self.config['page_margin']['left_margin'],
+            topMargin=self.config['page_margin']['top_margin'],
+            bottomMargin=self.config['page_margin']['bottom_margin']
+        )
         doc.build(self.stories)
         response = http.HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'filename="{mealTime:} by student.pdf"'.format(mealTime='')
@@ -87,7 +95,7 @@ class CreateProceeding:
         return bidi_text
 
     def create_space(self):
-        self.stories.append(Spacer(self.space_width, self.space_height))
+        self.stories.append(Spacer(self.config['space']['width'], self.config['space']['height']))
 
     def register_fonts(self):
         pdfmetrics.registerFont(TTFont('Yekan', '../fonts/Yekan/Yekan.ttf'))
@@ -133,8 +141,15 @@ class CreateProceeding:
                 signature_path = self.default_sign
             else:
                 signature_path = participant['signature']
-            signature.append(Image(open(signature_path, 'rb'), width=100, height=100, kind='proportional'))
-            if (i + 1) % self.participant_p_line == 0:
+            signature.append(
+                Image(
+                    open(signature_path, 'rb'),
+                    width=self.config['signature']['width'],
+                    height=self.config['signature']['height'],
+                    kind='proportional'
+                )
+            )
+            if (i + 1) % self.config['participant_p_line'] == 0:
                 rows.append(fullname)
                 rows.append(position)
                 rows.append(signature)
@@ -143,7 +158,11 @@ class CreateProceeding:
         rows.append(position)
         rows.append(signature)
         try:
-            table = Table(rows, colWidths=130, rowHeights=10)
+            table = Table(
+                rows,
+                colWidths=self.config['table']['col_width'],
+                rowHeights=self.config['table']['row_height']
+            )
             table.setStyle(self.tableStyle)
             self.stories.append(table)
         except:
@@ -154,7 +173,7 @@ class CreateProceeding:
         resolution = sorted(resolution, key=lambda r: int(r.item_no))
         for res in resolution:
             act_text = f"{res.item_no}. {res.act_text}"
-            wrapped_text = wrap(act_text, width=100)
+            wrapped_text = wrap(act_text, width=self.config['wrap_width'])
             for line in wrapped_text:
                 reshaped_text = self.arabic_reshaper(line)
                 p = Paragraph(reshaped_text, self.stylesheet.arabic_text_style())

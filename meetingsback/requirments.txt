@@ -8,3 +8,4 @@ psycopg2
 arabic_reshaper
 python-bidi
 django-braces
+pyyaml
