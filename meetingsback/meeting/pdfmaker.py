@@ -43,12 +43,11 @@ class CreateProceeding:
             self.config = yaml.safe_load(file)
 
         self.proceeding = proceeding
-        self.spaces = '&nbsp;' * 30
         self.register_fonts()
         self.tableStyle = TableStyle([
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('FONTNAME', (0, 0), (-1, -1), 'Yekan'),
-            ('ALIGNMENT', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTSIZE', (0, 0), (-1, -1), self.config['table']['font_size']),
+            ('FONTNAME', (0, 0), (-1, -1), self.config['table']['font_name']),
+            ('ALIGNMENT', (0, 0), (-1, -1), self.config['table']['alignment']),
         ])
 
         self.stylesheet = Stylesheet()
@@ -185,51 +184,55 @@ class CreateProceeding:
 class Stylesheet:
 
     def __init__(self):
+        with open(os.path.join(Path(__file__).resolve().parent, 'config/pdf_style.yml'), 'r') as file:
+            self.config = yaml.safe_load(file)
+
         self.style = getSampleStyleSheet()
 
-    def get_styles(self):
-        return self.style
-
     def arabic_text_style(self):
+        style = self.config['arabic_text_style']
         return ParagraphStyle(
-            name='border',
+            name=style['name'],
             parent=self.style['Normal'],
-            rightIndent=30,
+            rightIndent=style['rightIndent'],
             alignment=TA_RIGHT,
-            fontName="Yekan",
-            fontSize=9,
-            leading=12,
-            wordWrap='RTL',
-            language='AR',
+            fontName=style['fontName'],
+            fontSize=style['fontSize'],
+            leading=style['leading'],
+            wordWrap=style['wordWrap'],
+            language=style['language'],
         )
 
     def participants_text_style(self):
+        style = self.config['participants_text_style']
         return ParagraphStyle(
-            name='border',
+            name=style['name'],
             parent=self.style['Normal'],
-            rightIndent=30,
-            alignment=1,
+            rightIndent=style['rightIndent'],
+            alignment=style['alignment'],
             wordWrap=None,
-            fontName="Yekan",
-            fontSize=8,
+            fontName=style['fontName'],
+            fontSize=style['fontSize'],
         )
 
     def titr_text_style(self):
+        style = self.config['titr_text_style']
         return ParagraphStyle(
-            name='border',
+            name=style['name'],
             parent=self.style['Normal'],
-            spaceAfter=5,
-            rightIndent=30,
-            alignment=2,
-            fontName="Titr"
+            spaceAfter=style['spaceAfter'],
+            rightIndent=style['rightIndent'],
+            alignment=style['alignment'],
+            fontName=style['fontName']
         )
 
     def proceeding_title_style(self):
+        style = self.config['proceeding_title_style']
         return ParagraphStyle(
-            name='border',
+            name=style['name'],
             parent=self.style['Normal'],
-            spaceBefore=5,
-            spaceAfter=15,
-            alignment=1,
-            fontName="Titr"
+            spaceBefore=style['spaceBefore'],
+            spaceAfter=style['spaceAfter'],
+            alignment=style['alignment'],
+            fontName=style['fontName']
         )

@@ -1,0 +1,29 @@
+arabic_text_style:
+  name: 'border'
+  rightIndent: 30
+  fontName: "Yekan"
+  fontSize: 9
+  leading: 12
+  wordWrap: 'RTL'
+  language: 'AR'
+
+participants_text_style:
+  name: 'border'
+  rightIndent: 30
+  alignment: 1
+  fontName: "Yekan"
+  fontSize: 8
+
+titr_text_style:
+  name: 'border'
+  spaceAfter: 5
+  rightIndent: 30
+  alignment: 2
+  fontName: "Titr"
+
+proceeding_title_style:
+  name: 'border'
+  spaceBefore: 5
+  spaceAfter: 15
+  alignment: 1
+  fontName: "Titr"
