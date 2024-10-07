@@ -9,7 +9,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.tables import Table, TableStyle
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Image
-from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.enums import TA_JUSTIFY
 
 from jalali_date import date2jalali
 from bidi.algorithm import get_display
@@ -195,7 +195,7 @@ class Stylesheet:
             name=style['name'],
             parent=self.style['Normal'],
             rightIndent=style['rightIndent'],
-            alignment=TA_RIGHT,
+            alignment=TA_JUSTIFY,
             fontName=style['fontName'],
             fontSize=style['fontSize'],
             leading=style['leading'],

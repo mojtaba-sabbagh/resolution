@@ -1,10 +1,10 @@
 page_margin:
-  top_margin: 50
-  right_margin: 60
+  top_margin: 90
+  right_margin: 80
   bottom_margin: 40
   left_margin: 30
 
-wrap_width: 120
+wrap_width: 110
 
 table:
   row_height: 10
