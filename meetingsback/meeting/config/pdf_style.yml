@@ -27,3 +27,10 @@ proceeding_title_style:
   spaceAfter: 15
   alignment: 1
   fontName: "Titr"
+
+attached_style:
+  name: 'border'
+  spaceBefore: 6
+  fontSize: 8
+  alignment: 0
+  fontName: "Yekan"

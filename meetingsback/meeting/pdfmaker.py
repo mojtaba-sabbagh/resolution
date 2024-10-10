@@ -72,6 +72,11 @@ class CreateProceeding:
         return response
 
     def create_story(self):
+        self.add_proceed_number()
+        self.add_date()
+        self.add_attached()
+        self.create_space()
+        self.create_space()
         self.add_title()
         self.add_under_title()
         self.create_space()
@@ -99,6 +104,24 @@ class CreateProceeding:
     def register_fonts(self):
         pdfmetrics.registerFont(TTFont('Yekan', '../fonts/Yekan/Yekan.ttf'))
         pdfmetrics.registerFont(TTFont('Titr', '../fonts/Titr/titr.ttf'))
+
+    def add_proceed_number(self):
+        number = self.proceeding.proceeding_no
+        number = self.arabic_reshaper(number)
+        self.stories.append(Paragraph(number, self.stylesheet.attached_style()))
+
+    def add_date(self):
+        date = date2jalali(self.proceeding.pdate).strftime('%Y/%m/%d')
+        date = self.arabic_reshaper(date)
+        self.stories.append(Paragraph(date, self.stylesheet.attached_style()))
+
+    def add_attached(self):
+        attached = self.proceeding.upload
+        if attached is None or len(attached) == 0:
+            attached = self.arabic_reshaper('ندارد')
+        else:
+            attached = self.arabic_reshaper('دارد')
+        self.stories.append(Paragraph(attached, self.stylesheet.attached_style()))
 
     def add_title(self):
         meeting = models.Meeting.objects.get(pk=self.proceeding.meeting.id)
@@ -233,6 +256,17 @@ class Stylesheet:
             parent=self.style['Normal'],
             spaceBefore=style['spaceBefore'],
             spaceAfter=style['spaceAfter'],
+            alignment=style['alignment'],
+            fontName=style['fontName']
+        )
+
+    def attached_style(self):
+        style = self.config['attached_style']
+        return ParagraphStyle(
+            name=style['name'],
+            parent=self.style['Normal'],
+            spaceBefore=style['spaceBefore'],
+            fontSize=style['fontSize'],
             alignment=style['alignment'],
             fontName=style['fontName']
         )
