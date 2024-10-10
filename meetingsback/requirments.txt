@@ -9,3 +9,4 @@ arabic_reshaper
 python-bidi
 django-braces
 pyyaml
+python_docx
