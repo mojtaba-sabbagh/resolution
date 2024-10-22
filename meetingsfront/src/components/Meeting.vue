@@ -273,73 +273,91 @@
 <template>
     <div> 
         <span class="block-inline text-lg hover:text-blue-500 p-2 border-2 bg-red-100"> مدیریت جلسه </span>
-        <div class="flex flex-col font-farsi items-stretch items-center">
-            <div class="flex items-end">
-                <DropDown class="mt-10 mx-5 w-4/5 md:w-1/2" label_title="جلسات موجود"  @onChangeValue="getMeeting"
-                    :options="meetingNamesOptions" :order=1 :itemSelected="meetingId"/>
-                    <button class="block-inline flex items-end justify-right" @click="blankForm">
-                        <img class="opacity-60 hover:bg-red-100 w-8 p-1 mb-1" title="اضافه کردن جلسه" src="images/plus.png"/>
-                    </button>
-                    <button class="block-inline flex justify-center hover:bg-red-100 p-1 mb-1" @click="deleteMeeting" :disabled="meetingId == 0">
-                        <img class="w-6 opacity-60" title="حذف جلسه" src="images/minus.png"/>
-                    </button>
+        <div class="flex flex-col font-farsi items-center p-4 bg-gray-50">
+    <!-- Header Section for Meeting Selection -->
+    <div class="flex items-center justify-between w-full md:w-2/3 mb-8">
+        <DropDown class="w-full md:w-4/5" label_title="جلسات موجود" @onChangeValue="getMeeting"
+                  :options="meetingNamesOptions" :order=1 :itemSelected="meetingId"/>
+        <div class="flex space-x-3">
+            <!-- Add Meeting Button -->
+            <button class="flex items-center justify-center hover:bg-green-100 p-2 rounded-full bg-gray-200" @click="blankForm">
+                <img class="w-6" src="images/plus.png" title="اضافه کردن جلسه"/>
+            </button>
+            <!-- Delete Meeting Button -->
+            <button class="flex items-center justify-center hover:bg-red-100 p-2 rounded-full bg-gray-200"
+                    @click="deleteMeeting" :disabled="meetingId == 0">
+                <img class="w-6" src="images/minus.png" title="حذف جلسه"/>
+            </button>
+        </div>
+    </div>
+
+    <!-- Form Section for Adding/Editing Meeting -->
+    <div v-if="showForm" class="w-full md:w-2/3 p-5 bg-white rounded-lg shadow-lg">
+        <form @submit.prevent="addMeetingAPI">
+            <!-- Meeting Name and Period Selection -->
+            <div class="md:flex md:gap-4 mb-4">
+                <InputText class="w-full md:w-2/3" v-model:value="meetingName" @onChangeValue="updateName" 
+                           label_title="نام جلسه" input_placeholder="نام جلسه"/>
+                <DropDown class="w-full md:w-1/3" label_title="دوره" v-model="meetingPeriod" 
+                            :options="periodOptions" @onChangeValue="updatePeriod" :order=2 />
+
             </div>
-            <div v-if="showForm">
-                <div class="border border-gray-500 mt-5 pb-5 mx-5">
-                    <form v-on:submit.prevent="addMeetingAPI">
-                        <div class="md:flex md:flex-row gap-4 mt-5 items-center">
-                            <InputText  class="w-5/6 md:w-2/3 mx-4" v-model:value="meetingName"
-                                @onChangeValue="updateName" label_title="نام جلسه" input_placeholder="نام جلسه" />
-                            <DropDown class="w-5/6 md:w-1/3 mx-4" label_title="دوره"  v-model:itemSelected="meetingPeriod" 
-                                :options="periodOptions" @onChangeValue="updatePeriod" :order=2 />
-                        </div>
-                        <button class="hover:bg-red-100 mt-14 w-1/2 appearance-none border text-sm text-center rounded-lg p-2.5
-                            bg-red-50 border-gray-500 text-gray-900 placeholder-gray-200 focus:ring-gray-500 
-                            focus:border-gray-500 dark:bg-gray-100 dark:border-gray-400 disabled:bg-slate-50 disabled:text-slate-300" :disabled="isDisabled"> 
-                            <span> {{ buttonLabel }} </span>
-                        </button>
-                    </form>
-                    <p class="text-red-500 mt-2"> {{ errorMessage }} </p>
-                </div>
-                <div class="mt-10">
-                    <div class="flex items-center">
-                        <span class="block-inline float-right text-green-800 text-lg hover:text-blue-500 p-2">اعضاء جلسه: </span>
-                        <button class="block-inline flex justify-center hover:bg-red-100 hover:border hover:border-1 p-1"
-                                title="ذخیره همه اعضا" @click="saveAllMembers">
-                            <img class="w-7 opacity-60" src="images/ok.png"/>
-                        </button>
-                    </div>
-                    <div class="flex flex-col items-center pb-5 mx-5 border border-gray-500">
-                        <div class="w-full md:flex md:gap-6 justify-center mt-2 px-2" v-for="(member, i) in members">
-                            <DropDown class="w-full md:w-2/5 md:float-right" label_title="نام عضو"  v-model:itemSelected="members[i].employee_id" 
-                                    :options="employeeOptions" @onChangeValue="updateMember" :row="i" :order=3 />
-                            <DropDown class="w-full mt-1 md:w-2/5 md:mt-0 md:float-right" label_title="نقش"  v-model:itemSelected="members[i].role" :options="roleOptions"
-                                    @onChangeValue="updateRole" :row="i" :order=4 />
-                            <div class="flex flex-row items-end justify-center w-full md:w-1/4">  
-                                <button class="block-inline flex justify-center hover:bg-red-100 p-1" title="حذف عضو" 
-                                    :row="i" :name="members[i].id" @click="deleteMember">
-                                    <img class="w-7 opacity-60" src="images/minus.png"/>
-                                </button>
-                                <button class="block-inline flex justify-center hover:bg-red-100 hover:border hover:border-1 p-1"
-                                    title="ذخیره عضو" :row="i" :name="members[i].id" @click="saveMember">
-                                    <img class="w-7 opacity-60" src="images/ok.png"/>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-center mt-5">
-                        <button class="block-inline flex items-end justify-right" title="افزودن عضو" @click="addMember">
-                            <img class="opacity-60 hover:bg-red-100 w-8 p-1" src="images/plus.png"/>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex justify-center">
-                    <div  class="flex items-center justify-center md:w-1/4 my-5 text-black font-farsi text-sm font-bold px-4 py-3" role="alert">
-                        <p v-if="showAlert" class=""> {{ message }} </p>
-                    </div>
+            <!-- Submit Button -->
+            <button class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300" 
+                    :disabled="isDisabled">
+                <span> {{ buttonLabel }} </span>
+            </button>
+        </form>
+        <!-- Error Message -->
+        <p v-if="errorMessage" class="text-red-500 mt-2 text-center"> {{ errorMessage }} </p>
+    </div>
+
+    <!-- Members Section -->
+    <div class="w-full md:w-2/3 mt-8">
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-lg text-green-800">اعضاء جلسه:</span>
+            <button class="hover:bg-green-100 p-2 rounded-full" @click="saveAllMembers">
+                <img class="w-6" src="images/ok.png" title="ذخیره همه اعضا"/>
+            </button>
+        </div>
+
+        <!-- Members List -->
+        <div class="space-y-4">
+            <div class="flex items-center space-x-4" v-for="(member, i) in members" :key="i">
+                <!-- Member Name -->
+                <DropDown class="w-full md:w-2/5" label_title="نام عضو" v-model:itemSelected="members[i].employee_id" 
+                          :options="employeeOptions" @onChangeValue="updateMember" :row="i" :order=3 />
+                <!-- Member Role -->
+                <DropDown class="w-full md:w-2/5" label_title="نقش" v-model:itemSelected="members[i].role" 
+                          :options="roleOptions" @onChangeValue="updateRole" :row="i" :order=4 />
+                <!-- Delete and Save Buttons -->
+                <div class="flex space-x-2">
+                    <button class="hover:bg-red-100 p-2 rounded-full" @click="deleteMember(i)">
+                        <img class="w-6" src="images/minus.png" title="حذف عضو"/>
+                    </button>
+                    <button class="hover:bg-green-100 p-2 rounded-full" @click="saveMember(i)">
+                        <img class="w-6" src="images/ok.png" title="ذخیره عضو"/>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- Add Member Button -->
+        <div class="flex justify-center mt-4">
+            <button class="hover:bg-blue-100 p-2 rounded-full" @click="addMember">
+                <img class="w-6" src="images/plus.png" title="افزودن عضو"/>
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Section -->
+    <div class="w-full md:w-2/3 mt-8">
+        <div v-if="showAlert" class="bg-yellow-100 text-yellow-800 py-2 px-4 rounded-lg text-center">
+            {{ message }}
+        </div>
+    </div>
+</div>
+
     </div>
 </template>
 
